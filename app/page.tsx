@@ -79,11 +79,11 @@ export default function Page() {
     }
   }, [entered]);
 
-  const tracks: Track[] = [
-    { title: "С днем рождения, Вика", src: "/songs/song1.mp3" },
-    { title: "Ромашковая любовь", src: "/songs/song2.mp3" },
-    { title: "Креповая свадьба", src: "/songs/song3.mp3" },
-  ];
+ const tracks: { title: string; src: string }[] = [
+  { title: "С днем рождения, Вика", src: "/songs/song1.mp3" },
+  { title: "Ромашковая любовь",     src: "/songs/song2.mp3" },
+  { title: "Креповая свадьба",      src: "/songs/song3.mp3" },
+];
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
   const schema = [
@@ -212,7 +212,7 @@ export default function Page() {
           {/* Как заказать */}
           <div className="container mx-auto px-4 py-12 reveal">
             <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-              Как заказать
+              
             </h2>
             <HowToOrder />
           </div>

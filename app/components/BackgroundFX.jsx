@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-/** Лёгкий фон-градиент. НЕ перекрывает контент. */
+/** Лёгкий градиентный фон. Не мешает кликам и не перекрывает контент. */
 export default function BackgroundFX({ className = "" }) {
   return (
     <div
@@ -13,5 +13,3 @@ export default function BackgroundFX({ className = "" }) {
     </div>
   );
 }
-
-export { BackgroundFX };

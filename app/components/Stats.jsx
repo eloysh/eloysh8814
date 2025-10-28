@@ -16,7 +16,6 @@ export default function Stats() {
       <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
         Сколько уже сделано
       </h2>
-
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 max-w-4xl mx-auto">
         <KPI value="1200+" label="оживлённых фото" />
         <KPI value="350+"  label="смонтированных роликов" />
@@ -25,5 +24,3 @@ export default function Stats() {
     </section>
   );
 }
-
-export { Stats };

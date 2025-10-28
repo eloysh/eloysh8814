@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-body { @apply bg-slate-950 text-slate-100 antialiased; }
+/* Карточки/стекло */
+.card-glass {
+  @apply bg-white/5 backdrop-blur border border-white/10;
+}
 
-/* Плавное появление блоков */
-.reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
+/* Плавное появление секций */
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.show { opacity: 1; transform: translateY(0); }
 
-/* Простые кнопки */
-.btn { @apply inline-flex items-center justify-center px-4 py-2 rounded-xl border; }
-.btn-primary { @apply bg-sky-600 border-sky-500 hover:bg-sky-500 text-white; }
+/* Базовая подложка */
+html, body { @apply bg-slate-900 text-slate-100; }

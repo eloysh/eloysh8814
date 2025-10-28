@@ -5,3 +5,7 @@ declare namespace NodeJS {
     GOOGLE_SITE_VERIFICATION?: string;
   }
 }
+declare module "./components/AudioList" {
+  const C: React.ComponentType<{ tracks: never[] }>;
+  export default C;
+}

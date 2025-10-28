@@ -9,7 +9,7 @@ export default function EntryOverlay({ auto = true, autoDelay = 800, onEnter = (
       onEnter();
       try {
         const a = new Audio(audioSrc);
-        a.volume = 0.9;
+        a.volume = 0.6;
         a.play().catch(()=>{});
       } catch {}
     }, autoDelay);
