@@ -10,6 +10,7 @@ import BrandLogo from "./components/BrandLogo";
 
 // Хелпер: берём default, иначе именованный
 const pick = (m: any, name: string) => m.default ?? m[name];
+const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 // ---------- Типы только для AudioList ----------
 type Track = { title: string; src: string };
