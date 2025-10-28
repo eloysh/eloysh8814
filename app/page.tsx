@@ -73,7 +73,8 @@ export default function Page() {
       { title: "Креповая свадьба",     src: "/songs/song3.mp3" },
   ];
 
-  const base = "https://aimemories.ru";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
+
   const schema = [
     {
       "@context": "https://schema.org",
