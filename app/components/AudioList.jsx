@@ -1,11 +1,16 @@
 "use client";
+import React from "react";
+
 export default function AudioList({ tracks = [] }) {
   return (
     <div className="grid gap-3">
-      {tracks.map((t, i) => (
-        <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div className="font-medium">{t.title}</div>
-          <audio className="w-full mt-1" src={t.src} controls preload="none" />
+      {tracks.map((t) => (
+        <div
+          key={t.src}
+          className="p-4 rounded-xl bg-white/5 border border-white/10"
+        >
+          <div className="font-medium mb-2">{t.title}</div>
+          <audio controls src={t.src} className="w-full" />
         </div>
       ))}
     </div>

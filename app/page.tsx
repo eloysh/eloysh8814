@@ -5,7 +5,7 @@ import WhatsAppButton from "./components/WhatsAppButton";
 import SEOJsonLd from "./components/SEOJsonLd";
 import EntryOverlay from "./components/EntryOverlay";
 import BrandLogo from "./components/BrandLogo";
-
+import AudioList from "./components/AudioList";
 /** ВАЖНО: далее — СТАТИЧЕСКИЕ импорты всех блоков (без dynamic) */
 import ServicesNav from "./components/ServicesNav";
 import Pricing from "./components/Pricing";
@@ -26,8 +26,7 @@ import Reviews from "./components/Reviews";
 /** AudioList может экспортироваться по-разному — подхватываем оба случая */
 type Track = { title: string; src: string };
 type AudioListProps = { tracks: Track[] };
-import AudioListDefault, { AudioList as AudioListNamed } from "./components/AudioList";
-const AudioList = (AudioListDefault ?? AudioListNamed) as React.ComponentType<AudioListProps>;
+
 
 /** Хук для определения мобильного брейкпоинта */
 function useIsMobile(breakpoint = 768) {
