@@ -1,57 +1,58 @@
 "use client";
 import React from "react";
 
-const steps = [
-  {
-    title: "Бриф",
-    desc: "Опишите задачу: цель, жанр, настроение, длительность, где будет использоваться трек.",
-    tag: "Шаг 1",
-    time: "10–15 минут",
-    icon: "📝",
-  },
-  {
-    title: "Черновая идея",
-    desc: "Подбираем тональность/темп, эскиз мелодии/бит. Утверждаем направление.",
-    tag: "Шаг 2",
-    time: "24–48 часов",
-    icon: "🎼",
-  },
-  {
-    title: "Продакшн",
-    desc: "Аранжировка, текст (если нужен), запись. Присылаем превью, учитываем правки.",
-    tag: "Шаг 3",
-    time: "2–5 дней",
-    icon: "🎙️",
-  },
-  {
-    title: "Сведение и сдача",
-    desc: "Микс/мастер. Отдаём WAV/MP3 + стемы (по запросу), версии под соцсети.",
-    tag: "Шаг 4",
-    time: "до 1 дня",
-    icon: "✅",
-  },
-];
+function Step({ n, title, text }) {
+  return (
+    <div className="rounded-2xl card-glass p-5 flex gap-4 items-start">
+      <div className="w-10 h-10 shrink-0 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm font-semibold">
+        {n}
+      </div>
+      <div>
+        <div className="font-medium text-base">{title}</div>
+        <div className="text-sm text-slate-300 mt-1">{text}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function Scenes() {
+  const steps = [
+    {
+      title: "Бриф",
+      text:
+        "Заполняете короткий бриф: зачем музыка, длительность, настроение, примеры. Мы уточняем детали в WhatsApp.",
+    },
+    {
+      title: "Черновая идея",
+      text:
+        "Присылаем 1–2 эскиза мелодии и референс аранжировки. Выбираете направление, вносим правки.",
+    },
+    {
+      title: "Аранжировка и вокал",
+      text:
+        "Собираем полноценный трек (интро, куплет, припев), накладываем вокал/бэки по задаче.",
+    },
+    {
+      title: "Сведение и мастеринг",
+      text:
+        "Чистим шумы, балансируем инструменты, делаем финальный мастер под ваш формат (mp3/wav).",
+    },
+    {
+      title: "Доставка",
+      text:
+        "Отправляем файл(ы) и версии под соцсети/рекламу. По запросу — исходники и безвокальная версия.",
+    },
+  ];
+
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {steps.map((s, i) => (
-        <div
-          key={i}
-          className="rounded-2xl p-5 card-glass border border-white/10 bg-white/5 backdrop-blur"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm px-2 py-1 rounded bg-white/10">{s.tag}</div>
-            <div className="text-lg" aria-hidden>{s.icon}</div>
-          </div>
-          <h3 className="text-lg font-semibold">{s.title}</h3>
-          <p className="mt-2 text-slate-300 text-sm leading-relaxed">{s.desc}</p>
-          {s.time && (
-            <div className="mt-3 text-xs text-slate-400">Срок: {s.time}</div>
-          )}
-        </div>
-      ))}
-    </div>
+    <section className="reveal">
+      <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Процесс создания</h2>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {steps.map((s, i) => (
+          <Step key={i} n={i + 1} title={s.title} text={s.text} />
+        ))}
+      </div>
+    </section>
   );
 }
 
