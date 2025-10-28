@@ -1,6 +1,5 @@
 "use client";
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import WhatsAppButton from "./components/WhatsAppButton";
@@ -8,47 +7,55 @@ import SEOJsonLd from "./components/SEOJsonLd";
 import EntryOverlay from "./components/EntryOverlay";
 import BrandLogo from "./components/BrandLogo";
 
-// Хелпер: берём default, иначе именованный
-const pick = (m: any, name: string) => m.default ?? m[name];
-const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// БАЗОВЫЙ URL сайта (из .env, иначе локалка)
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const MOBILE_MQ = "(max-width: 640px)";
 
-// ---------- Типы только для AudioList ----------
+// Типы для AudioList
 type Track = { title: string; src: string };
 type AudioListProps = { tracks: Track[] };
 
-// Динамические компоненты (без пропсов — тип {}), а для AudioList — с типизацией
-const ServicesNav     = dynamic(() => import("./components/ServicesNav"    ).then(m => pick(m,"ServicesNav")),     { ssr:false, loading:()=>null });
-const Pricing         = dynamic(() => import("./components/Pricing"        ).then(m => pick(m,"Pricing")),         { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка цен…</div> });
-const BriefWizard     = dynamic(() => import("./components/BriefWizard"    ).then(m => pick(m,"BriefWizard")),     { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка брифа…</div> });
-const ContactForm     = dynamic(() => import("./components/ContactForm"    ).then(m => pick(m,"ContactForm")),     { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка формы…</div> });
-const SocialShare     = dynamic(() => import("./components/SocialShare"    ).then(m => pick(m,"SocialShare")),     { ssr:false, loading:()=>null });
-const BeforeAfterHero = dynamic(() => import("./components/BeforeAfterHero").then(m => pick(m,"BeforeAfterHero")), { ssr:false });
-const Stats           = dynamic(() => import("./components/Stats"          ).then(m => pick(m,"Stats")),           { ssr:false });
-const HowToOrder      = dynamic(() => import("./components/HowToOrder"     ).then(m => pick(m,"HowToOrder")),      { ssr:false });
-const TwoWorksVideo   = dynamic(() => import("./components/TwoWorksVideo"  ).then(m => pick(m,"TwoWorksVideo")),   { ssr:false });
-const Scenes          = dynamic(() => import("./components/Scenes"         ).then(m => pick(m,"Scenes")),          { ssr:false });
-const Showcase        = dynamic(() => import("./components/Showcase"       ).then(m => pick(m,"Showcase")),        { ssr:false, loading:()=>null });
-const Calculator      = dynamic(() => import("./components/Calculator"     ).then(m => pick(m,"Calculator")),      { ssr:false, loading:()=>null });
-const FAQ             = dynamic(() => import("./components/FAQ"            ).then(m => pick(m,"FAQ")),             { ssr:false, loading:()=>null });
-const BackgroundFX    = dynamic(() => import("./components/BackgroundFX"   ).then(m => pick(m,"BackgroundFX")),    { ssr:false });
+// Динамические компоненты
+const ServicesNav     = dynamic(() => import("./components/ServicesNav"    ).then(m => m.default ?? m.ServicesNav),     { ssr:false, loading:()=>null });
+const Pricing         = dynamic(() => import("./components/Pricing"        ).then(m => m.default ?? m.Pricing),         { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка цен…</div> });
+const BriefWizard     = dynamic(() => import("./components/BriefWizard"    ).then(m => m.default ?? m.BriefWizard),     { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка брифа…</div> });
+const ContactForm     = dynamic(() => import("./components/ContactForm"    ).then(m => m.default ?? m.ContactForm),     { ssr:false, loading:()=> <div className="text-center text-slate-500 py-6">Загрузка формы…</div> });
+const SocialShare     = dynamic(() => import("./components/SocialShare"    ).then(m => m.default ?? m.SocialShare),     { ssr:false, loading:()=>null });
+const BeforeAfterHero = dynamic(() => import("./components/BeforeAfterHero").then(m => m.default ?? m.BeforeAfterHero), { ssr:false });
+const Stats           = dynamic(() => import("./components/Stats"          ).then(m => m.default ?? m.Stats),           { ssr:false });
+const HowToOrder      = dynamic(() => import("./components/HowToOrder"     ).then(m => m.default ?? m.HowToOrder),      { ssr:false });
+const TwoWorksVideo   = dynamic(() => import("./components/TwoWorksVideo"  ).then(m => m.default ?? m.TwoWorksVideo),   { ssr:false });
+const Scenes          = dynamic(() => import("./components/Scenes"         ).then(m => m.default ?? m.Scenes),          { ssr:false });
+const Showcase        = dynamic(() => import("./components/Showcase"       ).then(m => m.default ?? m.Showcase),        { ssr:false, loading:()=>null });
+const Calculator      = dynamic(() => import("./components/Calculator"     ).then(m => m.default ?? m.Calculator),      { ssr:false, loading:()=>null });
+const FAQ             = dynamic(() => import("./components/FAQ"            ).then(m => m.default ?? m.FAQ),             { ssr:false, loading:()=>null });
+const BackgroundFX    = dynamic(() => import("./components/BackgroundFX"   ).then(m => m.default ?? m.BackgroundFX),    { ssr:false });
 
-// ВАЖНО: типизируем динамический импорт AudioList, чтобы проп "tracks" принимался
+// ВАЖНО: типизировали динамический импорт AudioList, чтобы проп "tracks" принимался
 const AudioList = dynamic<AudioListProps>(
-  () =>
-    import("./components/AudioList").then((m) =>
-      (pick(m, "AudioList") as unknown) as React.ComponentType<AudioListProps>
-    ),
+  () => import("./components/AudioList").then(m => m.default ?? m.AudioList),
   { ssr: false, loading: () => <div className="text-center text-slate-500 py-6">Загрузка треков…</div> }
 );
 
 export default function Page() {
   const [entered, setEntered] = useState(false);
+  const [overlayAllowed, setOverlayAllowed] = useState(false); // оверлей только на десктопе
 
-  // Плавное появление секций через IntersectionObserver
+  // Мобилка — без оверлея, десктоп — с оверлеем
+  useEffect(() => {
+    const mm = typeof window !== "undefined" ? window.matchMedia(MOBILE_MQ) : null;
+    if (mm?.matches) {
+      setEntered(true);          // сразу показываем сайт на мобилке
+      setOverlayAllowed(false);  // оверлей не нужен
+    } else {
+      setOverlayAllowed(true);   // на десктопе оверлей включён
+    }
+  }, []);
+
+  // Плавное появление секций
   useEffect(() => {
     if (!entered) return;
     const targets = Array.from(document.querySelectorAll(".reveal"));
-
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(
         (entries) => {
@@ -71,18 +78,16 @@ export default function Page() {
   const tracks: Track[] = [
     { title: "С днем рождения, Вика", src: "/songs/song1.mp3" },
     { title: "Ромашковая любовь",     src: "/songs/song2.mp3" },
-      { title: "Креповая свадьба",     src: "/songs/song3.mp3" },
+    { title: "Креповая свадьба",      src: "/songs/song3.mp3" },
   ];
-
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
 
   const schema = [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "AI Memories",
-      url: base,
-      logo: base + "/images/og-cover.svg",
+      url: SITE_URL,
+      logo: SITE_URL + "/images/og-cover.svg",
       description: "Студия создания песен на заказ для видео, рекламы и личных событий",
       email: "info@aimemories.ru",
       telephone: "+79841933792",
@@ -92,15 +97,15 @@ export default function Page() {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: "AI Memories — Создание песен на заказ",
-      url: base,
-      potentialAction: { "@type": "SearchAction", target: base + "/search?q={search_term_string}", "query-input": "required name=search_term_string" }
+      url: SITE_URL,
+      potentialAction: { "@type": "SearchAction", target: SITE_URL + "/search?q={search_term_string}", "query-input": "required name=search_term_string" }
     },
     {
       "@context": "https://schema.org",
       "@type": "Service",
       name: "Создание песни на заказ для видео",
       description: "Профессиональное создание уникальных песен и саундтреков для видео, рекламы и роликов.",
-      provider: { "@type": "Organization", name: "AI Memories", url: base },
+      provider: { "@type": "Organization", name: "AI Memories", url: SITE_URL },
       areaServed: "RU"
     },
     {
@@ -117,10 +122,12 @@ export default function Page() {
     <main className="min-h-screen">
       <SEOJsonLd data={schema} />
 
-      {!entered && (
+      {/* Оверлей только на ДЕСКТОПЕ и только пока не "вошли" */}
+      {overlayAllowed && !entered && (
         <EntryOverlay auto autoDelay={800} onEnter={() => setEntered(true)} />
       )}
 
+      {/* Контент — сразу на мобилке, или после клика на десктопе */}
       {entered && (
         <>
           <BackgroundFX />
@@ -128,12 +135,11 @@ export default function Page() {
           <section className="container mx-auto px-4 py-16 reveal">
             <BrandLogo size={160} withWordmark className="mx-auto mb-6" />
             <h1 className="text-3xl md:text-5xl font-semibold text-center">
-             Оживление ваших фотографии 
-            
-              Создание песни на заказ 
+              Оживление ваших фотографий · Создание песни на заказ
             </h1>
             <p className="text-center text-slate-300 mt-3 max-w-3xl mx-auto">
-              Профессиональное создание уникальных песен и саундтреков для вашего видео: реклама, YouTube, презентации, для семейного видео-фльбома.
+              Профессиональное создание уникальных песен и саундтреков для вашего видео:
+              реклама, YouTube, презентации, семейные видеоролики.
             </p>
 
             <div className="mt-8">
@@ -159,7 +165,9 @@ export default function Page() {
           </div>
 
           <section className="container mx-auto px-4 py-12 reveal">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Примеры авторских песен и саундтреков</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+              Примеры авторских песен и саундтреков
+            </h2>
             <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
               Послушайте примеры наших работ — уникальные песни и композиции
             </p>
@@ -189,7 +197,7 @@ export default function Page() {
           <section className="container mx-auto px-4 py-16 reveal">
             <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Бриф для заказа песни</h2>
             <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
-              Расскажите о вашей будующей песни 
+              Расскажите о вашей будущей песне в нашем удобном брифе
             </p>
             <BriefWizard />
           </section>
