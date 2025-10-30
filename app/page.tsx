@@ -1,139 +1,227 @@
-// app/page.tsx
 "use client";
-import React, { useEffect } from "react";
-
-import SEOJsonLd from "./components/SEOJsonLd";
+import React, { useEffect, useState } from "react";
 import BackgroundFX from "./components/BackgroundFX";
-import BeforeAfterHero from "./components/BeforeAfterHero";
-import Showcase from "./components/Showcase";
-import TwoWorksVideo from "./components/TwoWorksVideo";
-import Songs from "./components/Songs";          // <- используем Songs
 import WhatsAppButton from "./components/WhatsAppButton";
-import Stats from "./components/Stats";
-import Scenes from "./components/Scenes";
-import Calculator from "./components/Calculator";
-import Pricing from "./components/Pricing";
-
-import HowToOrder from "./components/HowToOrder";
-import FAQ from "./components/FAQ";
+import SEOJsonLd from "./components/SEOJsonLd";
 import BrandLogo from "./components/BrandLogo";
+import ServicesNav from "./components/ServicesNav";
+import Pricing from "./components/Pricing";
+import BriefWizard from "./components/BriefWizard";
+import ContactForm from "./components/ContactForm";
+import SocialShare from "./components/SocialShare";
+import BeforeAfterHero from "./components/BeforeAfterHero";
+import Stats from "./components/Stats";
+import HowToOrder from "./components/HowToOrder";
+import TwoWorksVideo from "./components/TwoWorksVideo";
+import Scenes from "./components/Scenes";
+import Showcase from "./components/Showcase";
+import Calculator from "./components/Calculator";
+import FAQ from "./components/FAQ";
+import Reviews from "./components/Reviews";
+
+// простой хук: считаем мобильным всё до 768px
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${breakpoint - 1}px)`);
+    const handler = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
+    handler(mq);
+    mq.addEventListener?.("change", handler as any);
+    // @ts-ignore для старых браузеров
+    mq.addListener?.(handler);
+    return () => {
+      mq.removeEventListener?.("change", handler as any);
+      // @ts-ignore
+      mq.removeListener?.(handler);
+    };
+  }, [breakpoint]);
+  return isMobile;
+}
 
 export default function Page() {
-  // Плавное появление секций
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("show")),
-      { threshold: 0.2 }
-    );
-    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+  const [entered, setEntered] = useState(false);
+  const isMobile = useIsMobile();
 
-  // JSON-LD
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
+  // На мобилке — сразу внутри
+  useEffect(() => {
+    setEntered(true);
+  }, [isMobile]);
+
+  // После "входа" принудительно показать все .reveal
+  useEffect(() => {
+    if (!entered) return;
+    const els = document.querySelectorAll(".reveal");
+    els.forEach((el) => el.classList.add("show"));
+
+    // параллельно запускаем IntersectionObserver (для десктопа — плавно)
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("show");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [entered]);
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
   const schema = [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "AI Memories",
-      url: base,
-      logo: base + "/opengraph-image.jpg",
-      sameAs: [base],
+      url: siteUrl,
+      logo: siteUrl + "/images/og-cover.svg",
+      description:
+        "Студия создания песен на заказ для видео, рекламы и личных событий",
+      email: "info@aimemories.ru",
+      telephone: "+79841933792",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+79841933792",
+        contactType: "customer service",
+      },
     },
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      url: base,
-      name: "AI Memories",
+      name: "AI Memories — Создание песен на заказ",
+      url: siteUrl,
       potentialAction: {
         "@type": "SearchAction",
-        target: base + "/?q={search_term_string}",
+        target: siteUrl + "/search?q={search_term_string}",
         "query-input": "required name=search_term_string",
       },
     },
     {
       "@context": "https://schema.org",
       "@type": "Service",
-      name: "Оживление фото в видео / Песня на заказ / Реставрация фото",
+      name: "Создание песни на заказ для видео",
+      description:
+        "Профессиональное создание уникальных песен и саундтреков для видео, рекламы и роликов.",
+      provider: { "@type": "Organization", name: "AI Memories", url: siteUrl },
       areaServed: "RU",
-      provider: { "@type": "LocalBusiness", name: "AI Memories" },
-      url: base,
     },
   ];
 
   return (
-    <div className="relative min-h-screen">
+    <main className="relative z-10 min-h-screen">
       <SEOJsonLd data={schema} />
       <BackgroundFX />
 
-      <section className="container py-16 space-y-16">
-        {/* Hero */}
-        <header className="text-center reveal">
-          <BrandLogo size={160} withWordmark />
-          <p className="text-slate-700 mt-4 max-w-2xl mx-auto">
-            Оживлю ваши фото и соберу трогательное видео-историю. Бесплатный тест — «Оживить фото».
-          </p>
-          <div className="mt-6 flex gap-3 justify-center flex-wrap">
-            <WhatsAppButton />
-            <a className="btn-ghost" href="/animate">Оживить фото бесплатно</a>
-          </div>
-        </header>
+      {/* Hero */}
+      <section className="container mx-auto px-4 py-16 reveal">
+        <BrandLogo size={160} withWordmark className="mx-auto mb-6" />
+        <h1 className="text-3xl md:text-5xl font-semibold text-center">
+          Оживление ваших фотографий · Создание песен на заказ
+        </h1>
+        <p className="text-center text-slate-300 mt-3 max-w-3xl mx-auto">
+          Профессионально оживляем фото и пишем уникальные саундтреки для
+          рекламы, YouTube, презентаций и семейных видео-альбомов.
+        </p>
 
-        {/* До/После */}
-        <div className="mx-auto mt-8 w-full max-w-6xl reveal">
-          <BeforeAfterHero
-            before="/works/hero_before.jpg"
-            after="/works/hero_after.jpg"
-            afterVideo="/works/hero_after.mp4"
-          />
+        <div className="mt-8">
+          <ServicesNav />
         </div>
-
-        {/* Кейсы/шоукейс */}
-        <div className="reveal">
-          <Showcase />
+        <div className="mt-6 text-center">
+          <WhatsAppButton className="mx-auto" />
         </div>
-
-        {/* Мобилка: 2 вертикальных ролика рядом */}
-        <div className="reveal md:hidden">
-          <TwoWorksVideo />
-        </div>
-
-        {/* ПК: одиночный ролик 9:16 */}
-        <section className="reveal hidden md:block">
-          <h2 className="text-3xl md:text-4xl font-semibold text-center mb-2">Пример работы</h2>
-          <div className="relative mx-auto aspect-[9/16] w-full max-w-[420px] max-h-[80vh] rounded-3xl overflow-hidden border border-white/10 bg-black/30">
-            <video
-              className="absolute inset-0 w-full h-full object-contain bg-black"
-              src="/works/videos/review_01.mp4"
-              poster="/works/videos/review_01_poster.jpg"
-              controls
-              playsInline
-            />
-            <div className="absolute top-3 left-3 text-xs bg-white/10 backdrop-blur px-2 py-1 rounded">
-              AI Memories
-            </div>
-          </div>
-        </section>
-
-        {/* Песни / аудио-примеры */}
-        <Songs />  {/* <- простой вызов, без пропов */}
-
-        {/* Остальные блоки */}
-        <Stats />
-        <Scenes />
-        <Calculator />
-        <Pricing />
-    
-        <HowToOrder />
-        <FAQ />
-
-        {/* Футер */}
-        <footer className="text-slate-600 reveal pt-8 pb-16 text-center">
-          <p>Почта: <a className="text-sky-700" href="mailto:info@aimemories.ru">info@aimemories.ru</a></p>
-          <p>WhatsApp: <a className="text-sky-700" href="https://wa.me/79841933792">+7 984 193-37-92</a></p>
-          <p className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</p>
-        </footer>
       </section>
-    </div>
+
+      {/* До/после */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <BeforeAfterHero />
+      </div>
+
+      {/* KPI */}
+      <Stats />
+
+      {/* Видео-блок */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <TwoWorksVideo />
+      </div>
+
+      {/* Кейсы/шоукейс */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <Showcase />
+      </div>
+
+      {/* Процесс */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Процесс создания
+        </h2>
+        <Scenes />
+      </div>
+
+      {/* Стоимость */}
+      <section className="container mx-auto px-4 py-12 reveal">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Стоимость
+        </h2>
+        <Pricing />
+      </section>
+
+      {/* Калькулятор */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Калькулятор
+        </h2>
+        <Calculator />
+      </div>
+
+      {/* Как заказать */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Как заказать
+        </h2>
+        <HowToOrder />
+      </div>
+
+      {/* Отзывы */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <Reviews />
+      </div>
+
+      {/* Бриф */}
+      <section className="container mx-auto px-4 py-16 reveal">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Бриф для заказа песни
+        </h2>
+        <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
+          Расскажите о вашей будущей песне — и мы предложим лучший вариант
+        </p>
+        <BriefWizard />
+      </section>
+
+      {/* FAQ */}
+      <div className="container mx-auto px-4 py-12 reveal">
+        <FAQ />
+      </div>
+
+      {/* Футер */}
+      <footer className="container mx-auto px-4 py-16 text-center text-slate-400">
+        <div>
+          Почта:{" "}
+          <a className="text-sky-300" href="mailto:info@aimemories.ru">
+            info@aimemories.ru
+          </a>
+        </div>
+        <div className="mt-1">
+          WhatsApp:{" "}
+          <a className="text-sky-300" href="https://wa.me/79841933792">
+            +7 984 193-37-92
+          </a>
+        </div>
+        <div className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</div>
+      </footer>
+    </main>
   );
 }

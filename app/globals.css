@@ -1,15 +1,25 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Карточки/стекло */
-.card-glass {
-  @apply bg-white/5 backdrop-blur border border-white/10;
+/* Плавное проявление секций */
+.reveal { 
+  opacity: 0; 
+  transform: translateY(16px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.reveal.show {
+  opacity: 1;
+  transform: none;
 }
 
-/* Плавное появление секций */
-.reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.show { opacity: 1; transform: translateY(0); }
+/* На мобилке ВСЁ сразу видно */
+@media (max-width: 767px) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
 
-/* Базовая подложка */
-html, body { @apply bg-slate-900 text-slate-100; }
+/* Стеклянные карточки (если используешь) */
+.card-glass {
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
