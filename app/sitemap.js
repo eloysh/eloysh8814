@@ -1,5 +1,14 @@
-export default function sitemap() {
-  const base = "https://aimemories.ru";
-  const now = new Date().toISOString();
-  return [{ url: base + "/", lastModified: now, changeFrequency: "weekly", priority: 1 }];
+import type { MetadataRoute } from "next";
+
+const siteUrl = "https://www.aimemories.ru";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    {
+      url: `${siteUrl}/`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+  ];
 }
