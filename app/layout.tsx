@@ -1,24 +1,16 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.aimemories.ru"),
-  title: "AI Memories — оживление фото и песни на заказ",
-  description: "Оживляем фотографии, создаём авторские песни и саундтреки для роликов, рекламы и семейных видео-альбомов.",
-  alternates: { canonical: "/" },
-  robots: { index: true, follow: true },
-  openGraph: {
-    type: "website",
-    url: "https://www.aimemories.ru/",
-    title: "AI Memories — оживление фото и песни на заказ",
-    description: "Оживляем фото и пишем уникальные саундтреки.",
-    images: [{ url: "/images/og-cover.svg" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI Memories",
-    description: "Оживляем фото и пишем уникальные саундтреки.",
-    images: ["/images/og-cover.svg"],
-  },
+  title: "AI Memories — Оживление фото и песни на заказ",
+  description: "Оживляем фото, создаём песни и саундтреки для ваших видео.",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ru" suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  );
+}
