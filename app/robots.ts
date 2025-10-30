@@ -1,17 +1,15 @@
-// app/robots.ts
-import type { MetadataRoute } from "next";
+// app/robots.js
+const siteUrl = "https://www.aimemories.ru";
 
-export default function robots(): MetadataRoute.Robots {
-  const base = "https://www.aimemories.ru";
+export default function robots() {
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/*", "/admin/*"],
+        disallow: ["/api/", "/admin/"],
       },
     ],
-    sitemap: `${base}/sitemap.xml`,
-    host: base,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }
