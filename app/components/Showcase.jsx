@@ -9,7 +9,7 @@ function ImgFallback({ src, fallback = "/images/og-cover.svg", alt = "", classNa
 }
 
 /** Контейнер фиксированного соотношения сторон */
-function Frame({ ratio = "16/9", className = "", children }) {
+function Frame({ ratio = "1/1", className = "", children }) {
   return (
     <div className={className} style={{ aspectRatio: ratio }}>
       {children}
@@ -25,7 +25,7 @@ function Slider({
   afterPoster,           // опционально, постер для видео
   beforeAlt = "До",
   afterAlt = "После",
-  ratio = "16/9",
+  ratio = "1/1",
   label,
 }) {
   const [x, setX] = useState(50);      // процент разделителя
