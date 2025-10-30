@@ -1,13 +1,10 @@
+// tailwind.config.mjs
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./app/**/*.{ts,tsx,js,jsx}",
-    "./components/**/*.{ts,tsx,js,jsx}",
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
   ],
-  theme: {
-    extend: {
-      colors: {},
-    },
-  },
+  theme: { extend: {} },
   plugins: [],
 };

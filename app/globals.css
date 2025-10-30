@@ -1,25 +1,25 @@
-/* Плавное проявление секций */
-.reveal { 
-  opacity: 0; 
-  transform: translateY(16px);
-  transition: opacity .35s ease, transform .35s ease;
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Анимация появления секций */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .4s ease, transform .4s ease;
 }
 .reveal.show {
   opacity: 1;
   transform: none;
 }
 
-/* На мобилке ВСЁ сразу видно */
+/* На мобильных показываем сразу, даже без IO */
 @media (max-width: 767px) {
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-  }
+  .reveal { opacity: 1; transform: none; }
 }
 
-/* Стеклянные карточки (если используешь) */
+/* Небольшие утилиты проекта */
 .card-glass {
-  backdrop-filter: blur(8px);
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
+  @apply bg-white/5 backdrop-blur border border-white/10;
 }
