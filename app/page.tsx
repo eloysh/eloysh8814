@@ -180,7 +180,7 @@ export default function Page() {
       {/* Как заказать */}
       <div className="container mx-auto px-4 py-12 reveal">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Как заказать
+          
         </h2>
         <HowToOrder />
       </div>
