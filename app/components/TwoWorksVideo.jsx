@@ -34,12 +34,12 @@ export default function TwoWorksVideo() {
         <VideoCard
           src="/works/videos/review_01.mp4"
           poster="/works/videos/review_01_poster.jpg"
-          title="Видео-отзыв"
+          title="Пример работы"
         />
         <VideoCard
           src="/works/videos/full_01.mp4"
           poster="/works/videos/full_01_poster.jpg"
-          title="Пример работы"
+          title="Видео-отзыв"
         />
       </div>
     </section>

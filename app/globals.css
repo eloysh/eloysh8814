@@ -23,32 +23,18 @@
 .card-glass {
   @apply bg-white/5 backdrop-blur border border-white/10;
 }
-.responsive-media{position:relative;background:#0F1320;border:1px solid rgba(255,255,255,.08);
-  border-radius:12px;padding:12px;overflow:visible;z-index:1}
-.responsive-media img,
-.responsive-media video{display:block;width:100%;height:auto}
-.responsive-media video{object-fit:cover;background:#000;border-radius:10px}
+/* Чтобы <picture> и <video> были резиновыми */
+.responsive-media {
+  margin: 0;
+}
+.responsive-media picture,
+.responsive-media video {
+  width: 100%;
+  display: block;
+}
 
 /* критично: на узких экранах ничего не скрываем */
 @media (max-width:560px){
   img, video{max-width:100% !important;height:auto !important}
   .hidden-mobile{display:unset !important;visibility:visible !important;opacity:1 !important}
 }
-.songs{margin:24px 0}
-.song-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media (max-width:1024px){.song-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:640px){.song-grid{grid-template-columns:1fr}}
-
-.song-card{background:#0F1320;border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
-.song-title{margin:0 0 4px;font-size:16px;font-weight:700}
-.song-artist{margin:0;opacity:.8;font-size:13px}
-
-/* Важное: обеспечить высоту под плеер */
-.song-embed{position:relative}
-.song-embed iframe,
-.song-embed audio{width:100%;border:0;display:block}
-
-/* Spotify обычно 152–232px; Яндекс 250–300px — подстрой по факту */
-.song-embed iframe{height:232px}
-@media (max-width:560px){.song-embed iframe{height:232px}}

@@ -1,41 +1,64 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import SocialShare from "./components/SocialShare";
+
 import BackgroundFX from "./components/BackgroundFX";
 import WhatsAppButton from "./components/WhatsAppButton";
 import SEOJsonLd from "./components/SEOJsonLd";
 import BrandLogo from "./components/BrandLogo";
 import ServicesNav from "./components/ServicesNav";
 import Pricing from "./components/Pricing";
-import BriefWizard from "./components/BriefWizard";
-import ContactForm from "./components/ContactForm";
-import SocialShare from "./components/SocialShare";
-import BeforeAfterHero from "./components/BeforeAfterHero";
 import Stats from "./components/Stats";
 import HowToOrder from "./components/HowToOrder";
-import TwoWorksVideo from "./components/TwoWorksVideo";
-import Scenes from "./components/Scenes";
-import Showcase from "./components/Showcase";
-import Calculator from "./components/Calculator";
 import FAQ from "./components/FAQ";
 import Reviews from "./components/Reviews";
+import BeforeAfterHero from "./components/BeforeAfterHero";
 
-// простой хук: считаем мобильным всё до 768px
+/** ТЯЖЁЛЫЕ блоки — dynamic */
+const TwoWorksVideo = dynamic(() => import("./components/TwoWorksVideo"), {
+  ssr: false,
+  loading: () => <div className="text-center text-slate-400">Загружаем видео…</div>,
+});
+const Showcase = dynamic(() => import("./components/Showcase"), {
+  ssr: false,
+  loading: () => <div className="text-center text-slate-400">Загружаем кейсы…</div>,
+});
+const Songs = dynamic(() => import("./components/Songs"), {
+  ssr: false,
+  loading: () => <div className="text-center text-slate-400">Загружаем песни…</div>,
+});
+const Scenes = dynamic(() => import("./components/Scenes"), {
+  ssr: false,
+  loading: () => <div className="text-center text-slate-400">Загружаем процесс…</div>,
+});
+
+/** ФОРМЫ — СИНХРОННО (для стабильной работы на мобилках) */
+import BriefWizard from "./components/BriefWizard";
+import Calculator from "./components/Calculator";
+
+/** Простой хук определения мобильной ширины (без TS-типов) */
 function useIsMobile(breakpoint = 768) {
   const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     const mq = window.matchMedia(`(max-width:${breakpoint - 1}px)`);
-    const handler = (e: MediaQueryListEvent | MediaQueryList) =>
-      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
+    const handler = (ev: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile("matches" in ev ? ev.matches : mq.matches);
+
+    // первичный вызов
     handler(mq);
-    mq.addEventListener?.("change", handler as any);
-    // @ts-ignore для старых браузеров
-    mq.addListener?.(handler);
-    return () => {
-      mq.removeEventListener?.("change", handler as any);
-      // @ts-ignore
-      mq.removeListener?.(handler);
-    };
+
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    } else if (typeof mq.addListener === "function") {
+      // старый Safari
+      mq.addListener(handler);
+      return () => mq.removeListener(handler);
+    }
   }, [breakpoint]);
+
   return isMobile;
 }
 
@@ -43,30 +66,32 @@ export default function Page() {
   const [entered, setEntered] = useState(false);
   const isMobile = useIsMobile();
 
-  // На мобилке — сразу внутри
+  // На мобилке — сразу показываем элементы (без «ленивых» анимаций)
   useEffect(() => {
     setEntered(true);
   }, [isMobile]);
 
-  // После "входа" принудительно показать все .reveal
+  // Reveal-анимации
   useEffect(() => {
     if (!entered) return;
-    const els = document.querySelectorAll(".reveal");
+
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
     els.forEach((el) => el.classList.add("show"));
 
-    // параллельно запускаем IntersectionObserver (для десктопа — плавно)
     if (!("IntersectionObserver" in window)) return;
+
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add("show");
+            (e.target as HTMLElement).classList.add("show");
             io.unobserve(e.target);
           }
         });
       },
       { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
     );
+
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [entered]);
@@ -133,6 +158,14 @@ export default function Page() {
         <div className="mt-6 text-center">
           <WhatsAppButton className="mx-auto" />
         </div>
+
+        {/* Шэр на Hero */}
+        <div className="mt-4">
+          <SocialShare
+            text="Оживление фото и песни на заказ — AI Memories"
+            className="justify-center"
+          />
+        </div>
       </section>
 
       {/* До/после */}
@@ -144,22 +177,34 @@ export default function Page() {
       <Stats />
 
       {/* Видео-блок */}
-      <div className="container mx-auto px-4 py-12 reveal">
+      <section className="container mx-auto px-4 py-12 reveal">
         <TwoWorksVideo />
-      </div>
+        <div className="mt-4">
+          <SocialShare
+            text="Оживление фото и песни на заказ — AI Memories"
+            className="justify-center"
+          />
+        </div>
+      </section>
 
-      {/* Кейсы/шоукейс */}
-      <div className="container mx-auto px-4 py-12 reveal">
+      {/* Кейсы */}
+      <section className="container mx-auto px-4 py-12 reveal">
         <Showcase />
-      </div>
+        <div className="mt-4">
+          <SocialShare
+            text="Оживление фото и песни на заказ — AI Memories"
+            className="justify-center"
+          />
+        </div>
+      </section>
 
       {/* Процесс */}
-      <div className="container mx-auto px-4 py-12 reveal">
+      <section className="container mx-auto px-4 py-12 reveal">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Процесс создания
+         
         </h2>
         <Scenes />
-      </div>
+      </section>
 
       {/* Стоимость */}
       <section className="container mx-auto px-4 py-12 reveal">
@@ -169,21 +214,35 @@ export default function Page() {
         <Pricing />
       </section>
 
+      {/* Песни */}
+      <section className="container mx-auto px-4 py-12 reveal songs">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+          Примеры песен
+        </h2>
+        <Songs />
+        <div className="mt-4">
+          <SocialShare
+            text="Оживление фото и песни на заказ — AI Memories"
+            className="justify-center"
+          />
+        </div>
+      </section>
+
       {/* Калькулятор */}
-      <div className="container mx-auto px-4 py-12 reveal">
+      <section className="container mx-auto px-4 py-12 reveal">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
           Калькулятор
         </h2>
         <Calculator />
-      </div>
+      </section>
 
       {/* Как заказать */}
-      <div className="container mx-auto px-4 py-12 reveal">
+      <section className="container mx-auto px-4 py-12 reveal">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          
+        
         </h2>
         <HowToOrder />
-      </div>
+      </section>
 
       {/* Отзывы */}
       <div className="container mx-auto px-4 py-12 reveal">
@@ -222,6 +281,23 @@ export default function Page() {
         </div>
         <div className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</div>
       </footer>
+
+      {/* Глобальные фиксы для мобильной видимости плееров */}
+      <style jsx global>{`
+        .songs iframe,
+        .songs audio {
+          width: 100%;
+          border: 0;
+          display: block;
+          min-height: 232px;
+        }
+        @media (max-width: 560px) {
+          .songs iframe,
+          .songs audio {
+            min-height: 232px;
+          }
+        }
+      `}</style>
     </main>
   );
 }

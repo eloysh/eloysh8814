@@ -1,17 +1,18 @@
 "use client";
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import WhatsAppButton from "./WhatsAppButton";
 
 // Форматирование цены в рубли
-const rub = (n) => new Intl.NumberFormat("ru-RU").format(Math.round(Number(n) || 0)) + " ₽";
+const rub = (n) =>
+  new Intl.NumberFormat("ru-RU").format(Math.round(Number(n) || 0)) + " ₽";
 
 // Базовые цены
 const PRICES = {
   miniVideo: 4500,       // до 10 фото
-  fullVideoFrom: 8000,   // от 10 фото
+  fullVideoFrom: 8000,   // от 10 фото (минимум)
   perPhotoNoSong: 225,   // поштучно без песни
-  perPhotoWithSong: 180, // поштучно с песней
-  oneTwoPhotos: 1350,    // 1-2 фото фикс
+  perPhotoWithSong: 180, // поштучно с песней (если заказывают песню)
+  oneTwoPhotos: 1350,    // 1–2 фото фикс
   exclusiveSong: 2500,   // песня на заказ
   addText: 100,          // титры/подписи
   musicPick: 150,        // подбор музыки
@@ -36,10 +37,9 @@ function Toggle({ label, note, checked, onChange }) {
 }
 
 export default function Calculator() {
-  const [mode, setMode] = useState("video"); // video | photos
-  const [videoType, setVideoType] = useState("mini"); // mini | full
+  const [mode, setMode] = useState("video");       // 'video' | 'photos'
+  const [videoType, setVideoType] = useState("mini"); // 'mini' | 'full'
   const [photos, setPhotos] = useState(10);
-  const [withSongOrder, setWithSongOrder] = useState(false);
   const [exclusiveSong, setExclusiveSong] = useState(false);
   const [addText, setAddText] = useState(false);
   const [musicPick, setMusicPick] = useState(false);
@@ -48,23 +48,25 @@ export default function Calculator() {
   // Расчёт стоимости
   const result = useMemo(() => {
     let base = 0;
-    let details = [];
+    const details = [];
 
     if (mode === "video") {
       if (videoType === "mini") {
         base = PRICES.miniVideo;
         details.push(["Мини-ролик (до 10 фото)", PRICES.miniVideo]);
       } else {
-        const photoPrice = photos * (withSongOrder ? PRICES.perPhotoWithSong : PRICES.perPhotoNoSong);
+        const perPhoto = exclusiveSong ? PRICES.perPhotoWithSong : PRICES.perPhotoNoSong;
+        const photoPrice = photos * perPhoto;
         base = Math.max(PRICES.fullVideoFrom, photoPrice);
         details.push([`Ролик (${photos} фото)`, base]);
       }
     } else {
       if (photos <= 2) {
         base = PRICES.oneTwoPhotos;
-        details.push(["1-2 фото", PRICES.oneTwoPhotos]);
+        details.push(["1–2 фото", PRICES.oneTwoPhotos]);
       } else {
-        const photoPrice = photos * (withSongOrder ? PRICES.perPhotoWithSong : PRICES.perPhotoNoSong);
+        const perPhoto = exclusiveSong ? PRICES.perPhotoWithSong : PRICES.perPhotoNoSong;
+        const photoPrice = photos * perPhoto;
         base = photoPrice;
         details.push([`${photos} фото`, photoPrice]);
       }
@@ -74,27 +76,24 @@ export default function Calculator() {
       base += PRICES.exclusiveSong;
       details.push(["Песня на заказ", PRICES.exclusiveSong]);
     }
-
     if (addText) {
       base += PRICES.addText;
       details.push(["Титры/подписи", PRICES.addText]);
     }
-
     if (musicPick) {
       base += PRICES.musicPick;
       details.push(["Подбор музыки", PRICES.musicPick]);
     }
-
     if (rush) {
       base += PRICES.rush;
       details.push(["Срочно 24ч", PRICES.rush]);
     }
 
     return { total: base, details };
-  }, [mode, videoType, photos, withSongOrder, exclusiveSong, addText, musicPick, rush]);
+  }, [mode, videoType, photos, exclusiveSong, addText, musicPick, rush]);
 
   // Текст для WhatsApp
-  const buildSummary = () => {
+  const summary = () => {
     const lines = ["Здравствуйте! Хочу заказать:"];
     if (mode === "video") {
       lines.push(videoType === "mini" ? "• Мини-ролик" : `• Ролик на ${photos} фото`);
@@ -126,7 +125,7 @@ export default function Calculator() {
             </select>
           </div>
 
-          {/* Количество фото */}
+          {/* Формат ролика (для видео) */}
           {mode === "video" && (
             <div className="space-y-2">
               <div className="font-medium mb-2">Формат ролика</div>
@@ -141,6 +140,7 @@ export default function Calculator() {
             </div>
           )}
 
+          {/* Количество фото */}
           {((mode === "video" && videoType === "full") || mode === "photos") && (
             <div className="space-y-2">
               <div className="font-medium mb-2">Количество фото</div>
@@ -149,7 +149,9 @@ export default function Calculator() {
                 min={1}
                 max={100}
                 value={photos}
-                onChange={(e) => setPhotos(Math.max(1, Math.min(100, Number(e.target.value) || 0)))}
+                onChange={(e) =>
+                  setPhotos(Math.max(1, Math.min(100, Number(e.target.value) || 0)))
+                }
                 className="w-full p-3 rounded-xl bg-white/5 border border-white/10"
               />
             </div>
@@ -201,7 +203,7 @@ export default function Calculator() {
             </div>
           </div>
           <div className="pt-4">
-            <WhatsAppButton text={buildSummary()} className="w-full justify-center" />
+            <WhatsAppButton text={summary()} className="w-full justify-center" />
           </div>
         </div>
       </div>

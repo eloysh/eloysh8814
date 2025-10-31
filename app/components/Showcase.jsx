@@ -194,7 +194,7 @@ beforeAlt: "После",
             beforeAlt={it.beforeAlt}
             afterAlt={it.afterAlt}
             label={it.label}
-            ratio="16/9"
+            ratio="9/9"
           />
         ))}
       </div>
