@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: { ignoreDuringBuilds: true } // временно, можно убрать позже
+  reactStrictMode: true,
+  images: { unoptimized: true },
+  eslint: { ignoreDuringBuilds: false }, // если пока мешает линт — можно true
 };
 export default nextConfig;
