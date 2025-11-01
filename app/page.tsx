@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import SocialShare from "./components/SocialShare";
@@ -16,37 +17,63 @@ import FAQ from "./components/FAQ";
 import Reviews from "./components/Reviews";
 import BeforeAfterHero from "./components/BeforeAfterHero";
 
-// формы — синхронно
-import BriefWizard from "./components/BriefWizard";
-import Calculator from "./components/Calculator";
-
-// тяжёлые блоки — динамически
+/** Тяжёлые блоки — динамически */
 const TwoWorksVideo = dynamic(() => import("./components/TwoWorksVideo"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем видео…</div>,
 });
+
 const Showcase = dynamic(() => import("./components/Showcase"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем кейсы…</div>,
 });
+
 const Songs = dynamic(() => import("./components/Songs"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем песни…</div>,
 });
+
 const Scenes = dynamic(() => import("./components/Scenes"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем процесс…</div>,
 });
 
-export default function Page() {
-  const [entered, setEntered] = useState(false);
-  const [overlayVisible, setOverlayVisible] = useState(false);
+/** Формы — синхронно (надёжнее на мобилках) */
+import BriefWizard from "./components/BriefWizard";
+import Calculator from "./components/Calculator";
 
-  // при загрузке проверяем, входил ли уже
+/** Reveal-анимации — без привязки к entered, чтобы секции не залипали скрытыми */
+function useReveal() {
+  useEffect(() => {
+    const add = (el: Element) => (el as HTMLElement).classList.add("show");
+    const els = document.querySelectorAll<HTMLElement>(".reveal");
+    els.forEach(add);
+
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            add(e.target);
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+export default function Page() {
+  /** Вход по кнопке — НЕ автоматический */
+  const [overlayVisible, setOverlayVisible] = useState(true);
+
+  // При первом рендере читаем localStorage, чтобы не всегда показывать оверлей
   useEffect(() => {
     try {
       const was = localStorage.getItem("entered") === "1";
-      setEntered(was);
       setOverlayVisible(!was);
     } catch {
       setOverlayVisible(true);
@@ -54,12 +81,21 @@ export default function Page() {
   }, []);
 
   const handleEnter = () => {
-    setEntered(true);
+    try {
+      localStorage.setItem("entered", "1");
+    } catch {}
     setOverlayVisible(false);
+    try {
+      const a = new Audio("/sounds/enter.wav");
+      a.volume = 0.6;
+      a.play().catch(() => {});
+    } catch {}
   };
 
+  useReveal();
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
-  const schema = [
+  const schema: any[] = [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -100,16 +136,17 @@ export default function Page() {
 
   return (
     <main className="relative min-h-screen">
-      {/* Оверлей с ручным входом */}
+      {/* Оверлей поверх всего */}
       {overlayVisible && (
         <EntryOverlay auto={false} onEnter={handleEnter} audioSrc="/sounds/enter.wav" />
       )}
 
-      {/* Контент — только ПОСЛЕ входа */}
-      {entered && (
+      {/* Контент только после входа */}
+      {!overlayVisible && (
         <>
           <SEOJsonLd data={schema} />
-          <BackgroundFX /> {/* убедись, что у корня внутри -z-10 и pointer-events-none */}
+          {/* Фон (внутри main, но с -z-10 и pointer-events-none) */}
+          <BackgroundFX />
 
           {/* Hero */}
           <section className="container mx-auto px-4 py-16 reveal">
@@ -130,7 +167,10 @@ export default function Page() {
             </div>
 
             <div className="mt-4">
-              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+              <SocialShare
+                text="Оживление фото и песни на заказ — AI Memories"
+                className="justify-center"
+              />
             </div>
           </section>
 
@@ -146,7 +186,10 @@ export default function Page() {
           <section className="container mx-auto px-4 py-12 reveal">
             <TwoWorksVideo />
             <div className="mt-4">
-              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+              <SocialShare
+                text="Оживление фото и песни на заказ — AI Memories"
+                className="justify-center"
+              />
             </div>
           </section>
 
@@ -154,13 +197,16 @@ export default function Page() {
           <section className="container mx-auto px-4 py-12 reveal">
             <Showcase />
             <div className="mt-4">
-              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+              <SocialShare
+                text="Оживление фото и песни на заказ — AI Memories"
+                className="justify-center"
+              />
             </div>
           </section>
 
           {/* Процесс */}
           <section className="container mx-auto px-4 py-12 reveal">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6" />
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Как мы работаем</h2>
             <Scenes />
           </section>
 
@@ -175,7 +221,10 @@ export default function Page() {
             <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Примеры песен</h2>
             <Songs />
             <div className="mt-4">
-              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+              <SocialShare
+                text="Оживление фото и песни на заказ — AI Memories"
+                className="justify-center"
+              />
             </div>
           </section>
 
@@ -187,7 +236,7 @@ export default function Page() {
 
           {/* Как заказать */}
           <section className="container mx-auto px-4 py-12 reveal">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6" />
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Как заказать</h2>
             <HowToOrder />
           </section>
 
@@ -198,7 +247,9 @@ export default function Page() {
 
           {/* Бриф */}
           <section className="container mx-auto px-4 py-16 reveal">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Бриф для заказа песни</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+              Бриф для заказа песни
+            </h2>
             <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
               Расскажите о вашей будущей песне — и мы предложим лучший вариант
             </p>
@@ -222,7 +273,7 @@ export default function Page() {
             <div className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</div>
           </footer>
 
-          {/* фиксы для аудио/iframe */}
+          {/* Глобальные фиксы для аудио/фреймов */}
           <style jsx global>{`
             .songs iframe,
             .songs audio {
