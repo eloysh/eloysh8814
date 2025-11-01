@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import SocialShare from "./components/SocialShare";
 
+import SocialShare from "./components/SocialShare";
+import EntryOverlay from "./components/EntryOverlay";
 import BackgroundFX from "./components/BackgroundFX";
 import WhatsAppButton from "./components/WhatsAppButton";
 import SEOJsonLd from "./components/SEOJsonLd";
@@ -15,7 +16,11 @@ import FAQ from "./components/FAQ";
 import Reviews from "./components/Reviews";
 import BeforeAfterHero from "./components/BeforeAfterHero";
 
-/** ТЯЖЁЛЫЕ блоки — dynamic */
+// формы — синхронно
+import BriefWizard from "./components/BriefWizard";
+import Calculator from "./components/Calculator";
+
+// тяжёлые блоки — динамически
 const TwoWorksVideo = dynamic(() => import("./components/TwoWorksVideo"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем видео…</div>,
@@ -24,80 +29,34 @@ const Showcase = dynamic(() => import("./components/Showcase"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем кейсы…</div>,
 });
- const Songs = dynamic(() => import("./components/Songs"), {
+const Songs = dynamic(() => import("./components/Songs"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем песни…</div>,
 });
-
-
-
 const Scenes = dynamic(() => import("./components/Scenes"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем процесс…</div>,
 });
 
-/** ФОРМЫ — СИНХРОННО (для стабильной работы на мобилках) */
-import BriefWizard from "./components/BriefWizard";
-import Calculator from "./components/Calculator";
-
-/** Простой хук определения мобильной ширины (без TS-типов) */
-function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(`(max-width:${breakpoint - 1}px)`);
-    const handler = (ev: MediaQueryListEvent | MediaQueryList) =>
-      setIsMobile("matches" in ev ? ev.matches : mq.matches);
-
-    // первичный вызов
-    handler(mq);
-
-    if (typeof mq.addEventListener === "function") {
-      mq.addEventListener("change", handler);
-      return () => mq.removeEventListener("change", handler);
-    } else if (typeof mq.addListener === "function") {
-      // старый Safari
-      mq.addListener(handler);
-      return () => mq.removeListener(handler);
-    }
-  }, [breakpoint]);
-
-  return isMobile;
-}
-
 export default function Page() {
   const [entered, setEntered] = useState(false);
-  const isMobile = useIsMobile();
+  const [overlayVisible, setOverlayVisible] = useState(false);
 
-  // На мобилке — сразу показываем элементы (без «ленивых» анимаций)
+  // при загрузке проверяем, входил ли уже
   useEffect(() => {
+    try {
+      const was = localStorage.getItem("entered") === "1";
+      setEntered(was);
+      setOverlayVisible(!was);
+    } catch {
+      setOverlayVisible(true);
+    }
+  }, []);
+
+  const handleEnter = () => {
     setEntered(true);
-  }, [isMobile]);
-
-  // Reveal-анимации
-  useEffect(() => {
-    if (!entered) return;
-
-    const els = document.querySelectorAll<HTMLElement>(".reveal");
-    els.forEach((el) => el.classList.add("show"));
-
-    if (!("IntersectionObserver" in window)) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            (e.target as HTMLElement).classList.add("show");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
-    );
-
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [entered]);
+    setOverlayVisible(false);
+  };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aimemories.ru";
   const schema = [
@@ -140,168 +99,141 @@ export default function Page() {
   ];
 
   return (
-    <main className="relative z-10 min-h-screen">
-      <SEOJsonLd data={schema} />
-      <BackgroundFX />
+    <main className="relative min-h-screen">
+      {/* Оверлей с ручным входом */}
+      {overlayVisible && (
+        <EntryOverlay auto={false} onEnter={handleEnter} audioSrc="/sounds/enter.wav" />
+      )}
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 py-16 reveal">
-        <BrandLogo size={160} withWordmark className="mx-auto mb-6" />
-        <h1 className="text-3xl md:text-5xl font-semibold text-center">
-          Оживление ваших фотографий · Создание песен на заказ
-        </h1>
-        <p className="text-center text-slate-300 mt-3 max-w-3xl mx-auto">
-          Профессионально оживляем фото и пишем уникальные саундтреки для
-          рекламы, YouTube, презентаций и семейных видео-альбомов.
-        </p>
+      {/* Контент — только ПОСЛЕ входа */}
+      {entered && (
+        <>
+          <SEOJsonLd data={schema} />
+          <BackgroundFX /> {/* убедись, что у корня внутри -z-10 и pointer-events-none */}
 
-        <div className="mt-8">
-          <ServicesNav />
-        </div>
-        <div className="mt-6 text-center">
-          <WhatsAppButton className="mx-auto" />
-        </div>
+          {/* Hero */}
+          <section className="container mx-auto px-4 py-16 reveal">
+            <BrandLogo size={160} withWordmark className="mx-auto mb-6" />
+            <h1 className="text-3xl md:text-5xl font-semibold text-center">
+              Оживление ваших фотографий · Создание песен на заказ
+            </h1>
+            <p className="text-center text-slate-300 mt-3 max-w-3xl mx-auto">
+              Профессионально оживляем фото и пишем уникальные саундтреки для рекламы, YouTube,
+              презентаций и семейных видео-альбомов.
+            </p>
 
-        {/* Шэр на Hero */}
-        <div className="mt-4">
-          <SocialShare
-            text="Оживление фото и песни на заказ — AI Memories"
-            className="justify-center"
-          />
-        </div>
-      </section>
+            <div className="mt-8">
+              <ServicesNav />
+            </div>
+            <div className="mt-6 text-center">
+              <WhatsAppButton className="mx-auto" />
+            </div>
 
-      {/* До/после */}
-      <div className="container mx-auto px-4 py-12 reveal">
-        <BeforeAfterHero />
-      </div>
+            <div className="mt-4">
+              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+            </div>
+          </section>
 
-      {/* KPI */}
-      <Stats />
+          {/* До/после */}
+          <div className="container mx-auto px-4 py-12 reveal">
+            <BeforeAfterHero />
+          </div>
 
-      {/* Видео-блок */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <TwoWorksVideo />
-        
-        <div className="mt-4">
-          <SocialShare
-            text="Оживление фото и песни на заказ — AI Memories"
-            className="justify-center"
-          />
-        </div>
-      </section>
+          {/* KPI */}
+          <Stats />
 
-      {/* Кейсы */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <Showcase />
-        <div className="mt-4">
-          <SocialShare
-            text="Оживление фото и песни на заказ — AI Memories"
-            className="justify-center"
-          />
-        </div>
-      </section>
+          {/* Видео-блок */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <TwoWorksVideo />
+            <div className="mt-4">
+              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+            </div>
+          </section>
 
-      {/* Процесс */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-         
-        </h2>
-        <Scenes />
-      </section>
+          {/* Кейсы */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <Showcase />
+            <div className="mt-4">
+              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+            </div>
+          </section>
 
-      {/* Стоимость */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Стоимость
-        </h2>
-        <Pricing />
-      </section>
+          {/* Процесс */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6" />
+            <Scenes />
+          </section>
 
-      {/* Песни */}
-      <section className="container mx-auto px-4 py-12 reveal songs">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Примеры песен
-        </h2>
-        <Songs />
-        <div className="mt-4">
-          <SocialShare
-            text="Оживление фото и песни на заказ — AI Memories"
-            className="justify-center"
-          />
-        </div>
-      </section>
+          {/* Стоимость */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Стоимость</h2>
+            <Pricing />
+          </section>
 
-      {/* Калькулятор */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Калькулятор
-        </h2>
-        <Calculator />
-      </section>
+          {/* Песни */}
+          <section className="container mx-auto px-4 py-12 reveal songs">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Примеры песен</h2>
+            <Songs />
+            <div className="mt-4">
+              <SocialShare text="Оживление фото и песни на заказ — AI Memories" className="justify-center" />
+            </div>
+          </section>
 
-      {/* Как заказать */}
-      <section className="container mx-auto px-4 py-12 reveal">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-        
-        </h2>
-        <HowToOrder />
-      </section>
+          {/* Калькулятор */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Калькулятор</h2>
+            <Calculator />
+          </section>
 
-      {/* Отзывы */}
-      <div className="container mx-auto px-4 py-12 reveal">
-        <Reviews />
-      </div>
+          {/* Как заказать */}
+          <section className="container mx-auto px-4 py-12 reveal">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6" />
+            <HowToOrder />
+          </section>
 
-      {/* Бриф */}
-      <section className="container mx-auto px-4 py-16 reveal">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-          Бриф для заказа песни
-        </h2>
-        <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
-          Расскажите о вашей будущей песне — и мы предложим лучший вариант
-        </p>
-        <BriefWizard />
-      </section>
+          {/* Отзывы */}
+          <div className="container mx-auto px-4 py-12 reveal">
+            <Reviews />
+          </div>
 
-      {/* FAQ */}
-      <div className="container mx-auto px-4 py-12 reveal">
-        <FAQ />
-      </div>
+          {/* Бриф */}
+          <section className="container mx-auto px-4 py-16 reveal">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Бриф для заказа песни</h2>
+            <p className="text-center text-slate-300 mb-8 max-w-3xl mx-auto">
+              Расскажите о вашей будущей песне — и мы предложим лучший вариант
+            </p>
+            <BriefWizard />
+          </section>
 
-      {/* Футер */}
-      <footer className="container mx-auto px-4 py-16 text-center text-slate-400">
-        <div>
-          Почта:{" "}
-          <a className="text-sky-300" href="mailto:info@aimemories.ru">
-            info@aimemories.ru
-          </a>
-        </div>
-        <div className="mt-1">
-          WhatsApp:{" "}
-          <a className="text-sky-300" href="https://wa.me/79841933792">
-            +7 984 193-37-92
-          </a>
-        </div>
-        <div className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</div>
-      </footer>
+          {/* Футер */}
+          <footer className="container mx-auto px-4 py-16 text-center text-slate-400">
+            <div>
+              Почта:{" "}
+              <a className="text-sky-300" href="mailto:info@aimemories.ru">
+                info@aimemories.ru
+              </a>
+            </div>
+            <div className="mt-1">
+              WhatsApp:{" "}
+              <a className="text-sky-300" href="https://wa.me/79841933792">
+                +7 984 193-37-92
+              </a>
+            </div>
+            <div className="mt-2 text-xs">© {new Date().getFullYear()} AI Memories</div>
+          </footer>
 
-      {/* Глобальные фиксы для мобильной видимости плееров */}
-      <style jsx global>{`
-        .songs iframe,
-        .songs audio {
-          width: 100%;
-          border: 0;
-          display: block;
-          min-height: 232px;
-        }
-        @media (max-width: 560px) {
-          .songs iframe,
-          .songs audio {
-            min-height: 232px;
-          }
-        }
-      `}</style>
+          {/* фиксы для аудио/iframe */}
+          <style jsx global>{`
+            .songs iframe,
+            .songs audio {
+              width: 100%;
+              border: 0;
+              display: block;
+              min-height: 232px;
+            }
+          `}</style>
+        </>
+      )}
     </main>
   );
 }

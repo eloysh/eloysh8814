@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 /** Безопасная картинка с фолбэком */
 function ImgFallback({ src, fallback = "/images/og-cover.svg", alt = "", className = "" }) {
@@ -17,12 +17,12 @@ function Frame({ ratio = "1/1", className = "", children }) {
   );
 }
 
-/** Слайдер До/После — поддержка картинки и видео, без setState в рендере */
+/** Слайдер До/После (картинка/видео) со звуком */
 function Slider({
   before = "/images/demo_before.svg",
   after = "/images/demo_after.svg",
   afterVideo,            // опционально
-  afterPoster,           // опционально, постер для видео
+  afterPoster,           // опционально
   beforeAlt = "До",
   afterAlt = "После",
   ratio = "1/1",
@@ -74,10 +74,9 @@ function Slider({
                 className="absolute inset-0 w-full h-full object-cover"
                 src={afterVideo}
                 poster={afterPoster || after}
-                playsInline
-                muted
-                loop
-                controls
+                playsInline              // iOS: остаёмся в странице
+                controls                 // звук доступен пользователю
+                preload="metadata"
                 onError={() => setVideoError(true)}
               />
             ) : (
@@ -88,7 +87,7 @@ function Slider({
           {/* бегунок */}
           <div
             className="absolute inset-y-0"
-            style={{ left: `${x}%`, transform: "translateX(-50%)" }}
+            style={{ left: `${x}%`, transform: "translateX(-50%)`" }}
             onMouseDown={(e) => { draggingRef.current = true; onMove(e.clientX); }}
             onTouchStart={(e) => { draggingRef.current = true; if (e.touches[0]) onMove(e.touches[0].clientX); }}
             role="slider" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(x)} tabIndex={0}
@@ -113,70 +112,34 @@ function Slider({
 }
 
 export default function Showcase() {
-  // === Твои данные ===
+  // === твои данные ===
   const items = [
-    { 
-      before: "/works/01_before.jpg", 
-      after: "/works/01_after.jpg", 
-      label: "Цветная фотография",
-      beforeAlt: "После",
-      afterAlt: "До"
-    },
-    { 
-      before: "/works/02_before.jpg", 
-      after: "/works/02_after.jpg", 
-      label: "Улучшение качества фотографии",
-      beforeAlt: "После",
-      afterAlt: "До"
-    },
-    { 
-      before: "/works/03_before.jpg", 
-      after: "/works/03_after.jpg", 
-      label: "Смена эмоций на фотографии",
-beforeAlt: "После",
-      afterAlt: "До"
-    },
-    { 
-      before: "/works/04_before.jpg", 
-      after: "/works/04_after.jpg", 
-      label: "Реставрация старых фотографий",
-      beforeAlt: "После",
-      afterAlt: "До"
-    },
-    { 
-      before: "/works/05_before.jpg", 
-      after: "/works/05_after.jpg", 
-      label: "Как бы фото выглядила в нащи дни",
-     beforeAlt: "После",
-      afterAlt: "До"
-    },
-    { 
-      before: "/works/011_before.jpg", 
-      after: "/works/011_after.jpg", 
-      label: "Реставрация старого снимка",
-      beforeAlt: "После",
-      afterAlt: "До"
-    },
+    { before: "/works/01_before.jpg", after: "/works/01_after.jpg", label: "Цветная фотография", beforeAlt: "До", afterAlt: "После" },
+    { before: "/works/02_before.jpg", after: "/works/02_after.jpg", label: "Улучшение качества фотографии", beforeAlt: "До", afterAlt: "После" },
+    { before: "/works/03_before.jpg", after: "/works/03_after.jpg", label: "Смена эмоций на фотографии", beforeAlt: "До", afterAlt: "После" },
+    { before: "/works/04_before.jpg", after: "/works/04_after.jpg", label: "Реставрация старых фотографий", beforeAlt: "До", afterAlt: "После" },
+    { before: "/works/05_before.jpg", after: "/works/05_after.jpg", label: "Как выглядело бы фото сегодня", beforeAlt: "До", afterAlt: "После" },
+    { before: "/works/011_before.jpg", after: "/works/011_after.jpg", label: "Реставрация старого снимка", beforeAlt: "До", afterAlt: "После" },
   ];
 
   const vertical = [
-    { 
-      before: "/works/talk_before.jpg", 
-      after: "/works/talk_after.jpg", 
-      afterVideo: "/works/talk_after.mp4", 
-      afterPoster: "/works/talk_after_poster.jpg", 
+    {
+      before: "/works/talk_before.jpg",
+      after: "/works/talk_after.jpg",
+      afterVideo: "/works/talk_after.mp4",
+      afterPoster: "/works/talk_after_poster.jpg",
       label: "Послание себе из прошлого. Оживление фото.",
-      beforeAlt: "После",
-      afterAlt: "До"
+      beforeAlt: "До",
+      afterAlt: "После",
     },
-    { 
-      before: "/works/06_before.jpg",   
-      after: "/works/06_after.jpg",   
-      afterVideo: "/works/06_after.mp4",   
-      afterPoster: "/works/06_after_poster.jpg",   
+    {
+      before: "/works/06_before.jpg",
+      after: "/works/06_after.jpg",
+      afterVideo: "/works/06_after.mp4",
+      afterPoster: "/works/06_after_poster.jpg",
       label: "Оживление фотографии и эмоций",
-      beforeAlt: "После",
-      afterAlt: "До"
+      beforeAlt: "До",
+      afterAlt: "После",
     },
   ];
 
@@ -194,12 +157,12 @@ beforeAlt: "После",
             beforeAlt={it.beforeAlt}
             afterAlt={it.afterAlt}
             label={it.label}
-            ratio="9/9"
+            ratio="1/1"
           />
         ))}
       </div>
 
-      {/* Вертикальные (мобильные) примеры */}
+      {/* Вертикальные (мобильные) примеры с ВИДЕО СО ЗВУКОМ */}
       {vertical.length > 0 && (
         <>
           <h3 className="text-xl md:text-2xl font-semibold text-center">Вертикальные / мобильные</h3>

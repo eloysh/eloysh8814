@@ -1,88 +1,72 @@
 "use client";
 import React from "react";
 
-/** Файлы положи в:
- * public/works/videos/review_01.mp4
- * public/works/videos/review_01.webm   (по желанию, как fallback)
- * public/works/videos/review_01_poster.jpg
- * public/works/videos/full_01.mp4
- * public/works/videos/full_01.webm     (по желанию)
- * public/works/videos/full_01_poster.jpg
- */
+const vids = [
+  {
+    id: "review",
+    titleMobile: "Послание себе из прошлого",
+    titleDesktop: "Видео-отзыв",
+    src: "/works/videos/review_01.mp4",
+    poster: "/works/videos/review_01_poster.jpg",
+  },
+  {
+    id: "full",
+    titleMobile: "Пример полного ролика",
+    titleDesktop: "Пример работы",
+    src: "/works/videos/full_01.mp4",
+    poster: "/works/videos/full_01_poster.jpg",
+  },
+];
 
 export default function TwoWorksVideo() {
   return (
     <section>
-      {/* Мобильный вертикальный блок — виден только на мобилке */}
+      {/* Мобильный: 9:16, со звуком */}
       <div className="md:hidden grid gap-4">
-        <VideoCard
-          title="Послание себе из прошлого"
-          note="Вертикальный формат 9:16"
-          aspect="mobile"
-          sources={[
-            { src: "/works/videos/review_01.webm", type: "video/webm" },
-            { src: "/works/videos/review_01.mp4",  type: "video/mp4"  },
-          ]}
-          poster="/works/videos/review_01_poster.jpg"
-        />
-        <VideoCard
-          title="Пример полного ролика"
-          note="Вертикальный формат 9:16"
-          aspect="mobile"
-          sources={[
-            { src: "/works/videos/full_01.webm", type: "video/webm" },
-            { src: "/works/videos/full_01.mp4",  type: "video/mp4"  },
-          ]}
-          poster="/works/videos/full_01_poster.jpg"
-        />
+        {vids.map((v) => (
+          <VideoCard
+            key={`m-${v.id}`}
+            title={v.titleMobile}
+            src={v.src}
+            poster={v.poster}
+            note="Вертикальный формат 9:16"
+            muted={false}
+            playsInline={true}
+          />
+        ))}
       </div>
 
-      {/* Десктопная сетка — видна только на md+ */}
+      {/* Десктоп: две карточки, тоже 9:16 */}
       <div className="hidden md:grid md:grid-cols-2 gap-6">
-        <VideoCard
-          title="Пример работы"
-        
-          aspect="desktop"
-          sources={[
-            { src: "/works/videos/review_01.webm", type: "video/webm" },
-            { src: "/works/videos/review_01.mp4",  type: "video/mp4"  },
-          ]}
-          poster="/works/videos/review_01_poster.jpg"
-        />
-        <VideoCard
-          title="Видео-отзыв"
-          
-          aspect="desktop"
-          sources={[
-            { src: "/works/videos/full_01.webm", type: "video/webm" },
-            { src: "/works/videos/full_01.mp4",  type: "video/mp4"  },
-          ]}
-          poster="/works/videos/full_01_poster.jpg"
-        />
+        {vids.map((v) => (
+          <VideoCard
+            key={`d-${v.id}`}
+            title={v.titleDesktop}
+            src={v.src}
+            poster={v.poster}
+            note="Горизонтальный 9:16"
+            muted={false}
+            playsInline={true}
+          />
+        ))}
       </div>
     </section>
   );
 }
 
-function VideoCard({ title, note, poster, sources, aspect = "desktop" }) {
-  // aspect: "mobile" => 9/16, "desktop" => 16/9
-  const aspectClass = aspect === "mobile" ? "aspect-[9/16]" : "aspect-video";
-
+function VideoCard({ title, src, poster, note, muted = false, playsInline = false }) {
   return (
     <figure className="rounded-2xl p-4 bg-white/5 border border-white/10">
-      <div className={`${aspectClass} overflow-hidden rounded-xl`}>
+      <div className="aspect-[9/16] overflow-hidden rounded-xl">
         <video
-          controls               /* по тапу со звуком */
+          controls
           preload="metadata"
           poster={poster}
           className="w-full h-full block"
-          playsInline            /* iOS inline */
-          webkit-playsinline="true"
-          x5-playsinline="true" /* WeChat/MIUI */
+          muted={muted}
+          playsInline={playsInline}
         >
-          {sources.map(s => (
-            <source key={s.src} src={s.src} type={s.type} />
-          ))}
+          <source src={src} type="video/mp4" />
           Ваш браузер не поддерживает видео.
         </video>
       </div>

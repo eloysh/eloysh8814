@@ -30,9 +30,9 @@ function KPI({ value, label }) {
 }
 
 export default function Stats() {
-  const photos = useCounter(1200);
-  const videos = useCounter(350);
-  const happy  = useCounter(98);
+  const photos = useCounter(250);
+  const videos = useCounter(140);
+  const happy  = useCounter(74);
 
   return (
     <section className="reveal">
