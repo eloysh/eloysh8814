@@ -6,13 +6,13 @@ import WhatsAppButton from "./WhatsAppButton";
 const rub = (n) =>
   new Intl.NumberFormat("ru-RU").format(Math.round(Number(n) || 0)) + " ₽";
 
-// Базовые цены
+// Базовые цены (можно менять)
 const PRICES = {
   miniVideo: 4500,       // до 10 фото
   fullVideoFrom: 8000,   // от 10 фото (минимум)
   perPhotoNoSong: 225,   // поштучно без песни
-  perPhotoWithSong: 180, // поштучно с песней (если заказывают песню)
-  oneTwoPhotos: 1350,    // 1–2 фото фикс
+  perPhotoWithSong: 180, // поштучно с песней
+  oneTwoPhotos: 1350,    // 1-2 фото фикс
   exclusiveSong: 2500,   // песня на заказ
   addText: 100,          // титры/подписи
   musicPick: 150,        // подбор музыки
@@ -37,15 +37,15 @@ function Toggle({ label, note, checked, onChange }) {
 }
 
 export default function Calculator() {
-  const [mode, setMode] = useState("video");       // 'video' | 'photos'
-  const [videoType, setVideoType] = useState("mini"); // 'mini' | 'full'
+  const [mode, setMode] = useState("video");      // video | photos
+  const [videoType, setVideoType] = useState("mini"); // mini | full
   const [photos, setPhotos] = useState(10);
+
   const [exclusiveSong, setExclusiveSong] = useState(false);
   const [addText, setAddText] = useState(false);
   const [musicPick, setMusicPick] = useState(false);
   const [rush, setRush] = useState(false);
 
-  // Расчёт стоимости
   const result = useMemo(() => {
     let base = 0;
     const details = [];
@@ -55,12 +55,14 @@ export default function Calculator() {
         base = PRICES.miniVideo;
         details.push(["Мини-ролик (до 10 фото)", PRICES.miniVideo]);
       } else {
+        // Полный ролик: считаем поштучно и сравниваем с минималкой
         const perPhoto = exclusiveSong ? PRICES.perPhotoWithSong : PRICES.perPhotoNoSong;
         const photoPrice = photos * perPhoto;
         base = Math.max(PRICES.fullVideoFrom, photoPrice);
         details.push([`Ролик (${photos} фото)`, base]);
       }
     } else {
+      // Отдельные фото
       if (photos <= 2) {
         base = PRICES.oneTwoPhotos;
         details.push(["1–2 фото", PRICES.oneTwoPhotos]);
@@ -92,25 +94,30 @@ export default function Calculator() {
     return { total: base, details };
   }, [mode, videoType, photos, exclusiveSong, addText, musicPick, rush]);
 
-  // Текст для WhatsApp
-  const summary = () => {
+  // ✅ Функция формирования текста для WhatsApp — была отсутствующей
+  const buildSummary = () => {
     const lines = ["Здравствуйте! Хочу заказать:"];
     if (mode === "video") {
-      lines.push(videoType === "mini" ? "• Мини-ролик" : `• Ролик на ${photos} фото`);
+      lines.push(videoType === "mini" ? "• Мини-ролик (до 10 фото)" : `• Ролик на ${photos} фото`);
     } else {
       lines.push(`• Оживление ${photos} фото`);
     }
     if (exclusiveSong) lines.push("• С песней на заказ");
-    if (addText) lines.push("• С титрами/подписями");
-    if (musicPick) lines.push("• Нужен подбор музыки");
-    if (rush) lines.push("• Срочно (24 часа)");
-    lines.push(`\nПримерная стоимость: ${rub(result.total)}`);
+    if (addText)       lines.push("• С титрами/подписями");
+    if (musicPick)     lines.push("• Нужен подбор музыки");
+    if (rush)          lines.push("• Срочно (до 24 часов)");
+    lines.push("");
+    lines.push("Детализация:");
+    result.details.forEach(([label, price]) => lines.push(`• ${label}: ${rub(price)}`));
+    lines.push("");
+    lines.push(`Итого: ${rub(result.total)}`);
     return lines.join("\n");
   };
 
   return (
     <div className="card-glass p-6">
       <div className="grid gap-6 md:grid-cols-[1fr,auto]">
+        {/* Левая колонка — параметры */}
         <div className="space-y-4">
           {/* Тип заказа */}
           <div className="space-y-2">
@@ -125,7 +132,7 @@ export default function Calculator() {
             </select>
           </div>
 
-          {/* Формат ролика (для видео) */}
+          {/* Для видео — формат */}
           {mode === "video" && (
             <div className="space-y-2">
               <div className="font-medium mb-2">Формат ролика</div>
@@ -140,7 +147,7 @@ export default function Calculator() {
             </div>
           )}
 
-          {/* Количество фото */}
+          {/* Количество фото (нужно для «Полного ролика» и для «Отдельных фото») */}
           {((mode === "video" && videoType === "full") || mode === "photos") && (
             <div className="space-y-2">
               <div className="font-medium mb-2">Количество фото</div>
@@ -187,7 +194,7 @@ export default function Calculator() {
           </div>
         </div>
 
-        {/* Итоги */}
+        {/* Правая колонка — расчёт и кнопка */}
         <div className="space-y-4">
           <div className="font-medium mb-2">Расчёт стоимости</div>
           <div className="space-y-2 text-sm">
@@ -202,8 +209,21 @@ export default function Calculator() {
               <span>{rub(result.total)}</span>
             </div>
           </div>
+
           <div className="pt-4">
-            <WhatsAppButton text={summary()} className="w-full justify-center" />
+            {/* ✅ Кнопка с заранее заполненным текстом */}
+            <WhatsAppButton text={buildSummary()} className="w-full justify-center" />
+
+            {/* Если по каким-то причинам твой WhatsAppButton ещё не принимает text:
+            <a
+              href={`https://wa.me/79841933792?text=${encodeURIComponent(buildSummary())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary w-full justify-center block text-center mt-2"
+            >
+              Написать в WhatsApp
+            </a>
+            */}
           </div>
         </div>
       </div>

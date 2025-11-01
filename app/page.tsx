@@ -24,10 +24,13 @@ const Showcase = dynamic(() => import("./components/Showcase"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем кейсы…</div>,
 });
-const Songs = dynamic(() => import("./components/Songs"), {
+ const Songs = dynamic(() => import("./components/Songs"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем песни…</div>,
 });
+
+
+
 const Scenes = dynamic(() => import("./components/Scenes"), {
   ssr: false,
   loading: () => <div className="text-center text-slate-400">Загружаем процесс…</div>,
@@ -179,6 +182,7 @@ export default function Page() {
       {/* Видео-блок */}
       <section className="container mx-auto px-4 py-12 reveal">
         <TwoWorksVideo />
+        
         <div className="mt-4">
           <SocialShare
             text="Оживление фото и песни на заказ — AI Memories"

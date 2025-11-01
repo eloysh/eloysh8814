@@ -30,11 +30,12 @@
 .responsive-media picture,
 .responsive-media video {
   width: 100%;
+  height: auto;
   display: block;
 }
 
 /* критично: на узких экранах ничего не скрываем */
 @media (max-width:560px){
-  img, video{max-width:100% !important;height:auto !important}
+  img, 
   .hidden-mobile{display:unset !important;visibility:visible !important;opacity:1 !important}
 }

@@ -1,47 +1,95 @@
 "use client";
 import React from "react";
 
-function VideoCard({ src, poster, title = "", badge = "AI Memories" }) {
-  return (
-    <div className="relative aspect-[9/16] rounded-3xl overflow-hidden card-glass">
-      <video
-        src={src}
-        poster={poster}
-        className="absolute inset-0 w-full h-full object-cover"
-        controls
-        playsInline
-      />
-      <div className="absolute top-3 left-3 text-xs bg-white/10 backdrop-blur px-2 py-1 rounded">
-        {badge}
-      </div>
-      {title && (
-        <div className="absolute bottom-0 inset-x-0 text-center text-sm py-2 bg-black/50 backdrop-blur-sm">
-          {title}
-        </div>
-      )}
-    </div>
-  );
-}
+/** Файлы положи в:
+ * public/works/videos/review_01.mp4
+ * public/works/videos/review_01.webm   (по желанию, как fallback)
+ * public/works/videos/review_01_poster.jpg
+ * public/works/videos/full_01.mp4
+ * public/works/videos/full_01.webm     (по желанию)
+ * public/works/videos/full_01_poster.jpg
+ */
 
 export default function TwoWorksVideo() {
   return (
-    <section className="reveal">
-      <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
-        Видео-отзыв и пример работы
-      </h2>
-
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto">
+    <section>
+      {/* Мобильный вертикальный блок — виден только на мобилке */}
+      <div className="md:hidden grid gap-4">
         <VideoCard
-          src="/works/videos/review_01.mp4"
+          title="Послание себе из прошлого"
+          note="Вертикальный формат 9:16"
+          aspect="mobile"
+          sources={[
+            { src: "/works/videos/review_01.webm", type: "video/webm" },
+            { src: "/works/videos/review_01.mp4",  type: "video/mp4"  },
+          ]}
           poster="/works/videos/review_01_poster.jpg"
-          title="Пример работы"
         />
         <VideoCard
-          src="/works/videos/full_01.mp4"
+          title="Пример полного ролика"
+          note="Вертикальный формат 9:16"
+          aspect="mobile"
+          sources={[
+            { src: "/works/videos/full_01.webm", type: "video/webm" },
+            { src: "/works/videos/full_01.mp4",  type: "video/mp4"  },
+          ]}
           poster="/works/videos/full_01_poster.jpg"
+        />
+      </div>
+
+      {/* Десктопная сетка — видна только на md+ */}
+      <div className="hidden md:grid md:grid-cols-2 gap-6">
+        <VideoCard
+          title="Пример работы"
+        
+          aspect="desktop"
+          sources={[
+            { src: "/works/videos/review_01.webm", type: "video/webm" },
+            { src: "/works/videos/review_01.mp4",  type: "video/mp4"  },
+          ]}
+          poster="/works/videos/review_01_poster.jpg"
+        />
+        <VideoCard
           title="Видео-отзыв"
+          
+          aspect="desktop"
+          sources={[
+            { src: "/works/videos/full_01.webm", type: "video/webm" },
+            { src: "/works/videos/full_01.mp4",  type: "video/mp4"  },
+          ]}
+          poster="/works/videos/full_01_poster.jpg"
         />
       </div>
     </section>
+  );
+}
+
+function VideoCard({ title, note, poster, sources, aspect = "desktop" }) {
+  // aspect: "mobile" => 9/16, "desktop" => 16/9
+  const aspectClass = aspect === "mobile" ? "aspect-[9/16]" : "aspect-video";
+
+  return (
+    <figure className="rounded-2xl p-4 bg-white/5 border border-white/10">
+      <div className={`${aspectClass} overflow-hidden rounded-xl`}>
+        <video
+          controls               /* по тапу со звуком */
+          preload="metadata"
+          poster={poster}
+          className="w-full h-full block"
+          playsInline            /* iOS inline */
+          webkit-playsinline="true"
+          x5-playsinline="true" /* WeChat/MIUI */
+        >
+          {sources.map(s => (
+            <source key={s.src} src={s.src} type={s.type} />
+          ))}
+          Ваш браузер не поддерживает видео.
+        </video>
+      </div>
+      <figcaption className="text-sm mt-2">
+        <div className="text-slate-100 font-medium">{title}</div>
+        <div className="text-slate-400">{note}</div>
+      </figcaption>
+    </figure>
   );
 }
